@@ -6,8 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.tugaskuliah.screen.DetailScreen
-import com.example.tugaskuliah.screen.MainScreen
+import com.haikal0045.kuliahku.ui.screen.DetailScreen
+import com.haikal0045.kuliahku.ui.screen.MainScreen
 
 @Composable
 fun SetupNavGraph() {
