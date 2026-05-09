@@ -70,7 +70,7 @@ fun MainScreen(navController: NavHostController) {
                 title = {
                     Text(text = stringResource(R.string.app_name))
                 },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
