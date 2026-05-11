@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.haikal0045.kuliahku.R
+import com.haikal0045.kuliahku.model.Kategori
 import com.haikal0045.kuliahku.model.Tugas
 import com.haikal0045.kuliahku.navigation.Screen
 import com.haikal0045.kuliahku.util.SettingsDataStore
@@ -55,7 +58,9 @@ fun MainScreen(navController: NavHostController) {
     val context = LocalContext.current
     val factory = ViewModelFactory(context)
     val viewModel: MainViewModel = viewModel(factory = factory)
+
     val data by viewModel.data.collectAsState()
+    val kategori by viewModel.kategori.collectAsState()
 
     val settingsDataStore = remember {
         SettingsDataStore(context)
@@ -84,12 +89,43 @@ fun MainScreen(navController: NavHostController) {
                     ) {
                         Icon(
                             painter = painterResource(
-                                if (showList) R.drawable.baseline_grid_view_24
-                                else R.drawable.baseline_view_list_24
+                                id = if (showList) {
+                                    R.drawable.baseline_grid_view_24
+                                } else {
+                                    R.drawable.baseline_view_list_24
+                                }
                             ),
                             contentDescription = stringResource(
-                                if (showList) R.string.grid else R.string.list
+                                if (showList) {
+                                    R.string.grid
+                                } else {
+                                    R.string.list
+                                }
                             ),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            navController.navigate(Screen.RecycleBin.route)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Recycle Bin",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            navController.navigate(Screen.Tema.route)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = "Pilih Tema",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -111,6 +147,7 @@ fun MainScreen(navController: NavHostController) {
     ) { innerPadding ->
         ScreenContent(
             data = data,
+            kategori = kategori,
             showList = showList,
             modifier = Modifier.padding(innerPadding),
             navController = navController
@@ -122,6 +159,7 @@ fun MainScreen(navController: NavHostController) {
 @Composable
 fun ScreenContent(
     data: List<Tugas>,
+    kategori: List<Kategori>,
     showList: Boolean,
     modifier: Modifier = Modifier,
     navController: NavHostController
@@ -142,9 +180,13 @@ fun ScreenContent(
                 modifier = modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 84.dp)
             ) {
-                items(data) { tugas ->
+                items(
+                    items = data,
+                    key = { tugas -> tugas.id }
+                ) { tugas ->
                     TugasListItem(
                         tugas = tugas,
+                        namaKategori = getNamaKategori(tugas.kategoriId, kategori),
                         onClick = {
                             navController.navigate(Screen.FormUbah.withId(tugas.id))
                         }
@@ -165,9 +207,13 @@ fun ScreenContent(
                     bottom = 84.dp
                 )
             ) {
-                items(data) { tugas ->
+                items(
+                    items = data,
+                    key = { tugas -> tugas.id }
+                ) { tugas ->
                     TugasGridItem(
                         tugas = tugas,
+                        namaKategori = getNamaKategori(tugas.kategoriId, kategori),
                         onClick = {
                             navController.navigate(Screen.FormUbah.withId(tugas.id))
                         }
@@ -178,9 +224,17 @@ fun ScreenContent(
     }
 }
 
+fun getNamaKategori(
+    kategoriId: Long,
+    kategori: List<Kategori>
+): String {
+    return kategori.firstOrNull { it.id == kategoriId }?.nama ?: "Tanpa kategori"
+}
+
 @Composable
 fun TugasListItem(
     tugas: Tugas,
+    namaKategori: String,
     onClick: () -> Unit
 ) {
     Column(
@@ -195,6 +249,12 @@ fun TugasListItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = "Kategori: $namaKategori",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
 
         Text(
@@ -225,6 +285,7 @@ fun TugasListItem(
 @Composable
 fun TugasGridItem(
     tugas: Tugas,
+    namaKategori: String,
     onClick: () -> Unit
 ) {
     Card(
@@ -245,6 +306,12 @@ fun TugasGridItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = namaKategori,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             Text(

@@ -1,58 +1,41 @@
 package com.haikal0045.kuliahku.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun KuliahKuTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    themeColor: Int = 0,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val primaryColor = when (themeColor) {
+        1 -> Color(0xFF1565C0)
+        2 -> Color(0xFF2E7D32)
+        3 -> Color(0xFFC62828)
+        else -> Color(0xFF6750A4)
     }
+
+    val primaryContainerColor = when (themeColor) {
+        1 -> Color(0xFFD3E3FD)
+        2 -> Color(0xFFC8E6C9)
+        3 -> Color(0xFFFFCDD2)
+        else -> Color(0xFFEADDFF)
+    }
+
+    val colorScheme = lightColorScheme(
+        primary = primaryColor,
+        onPrimary = Color.White,
+        primaryContainer = primaryContainerColor,
+        onPrimaryContainer = primaryColor,
+        secondary = primaryColor,
+        background = Color(0xFFFFFBFE),
+        surface = Color(0xFFFFFBFE)
+    )
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
         content = content
     )
 }

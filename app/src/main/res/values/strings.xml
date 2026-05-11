@@ -3,6 +3,9 @@
 
     <string name="tambah_tugas">Tambah Tugas</string>
     <string name="ubah_tugas">Ubah Tugas</string>
+
+    <string name="kategori">Kategori</string>
+    <string name="pilih_kategori">Pilih kategori</string>
     <string name="mata_kuliah">Mata Kuliah</string>
     <string name="judul_tugas">Judul Tugas</string>
     <string name="deadline">Deadline</string>
@@ -14,8 +17,8 @@
     <string name="list_kosong">Belum ada tugas kuliah.</string>
 
     <string name="opsi_lainnya">Opsi lainnya</string>
-    <string name="hapus_tugas">Hapus tugas</string>
-    <string name="pesan_hapus">Hapus tugas ini?</string>
+    <string name="hapus_tugas">Hapus</string>
+    <string name="pesan_hapus">Tugas akan dipindahkan ke Recycle Bin. Lanjutkan?</string>
     <string name="tombol_batal">Batal</string>
     <string name="tombol_hapus">Hapus</string>
 

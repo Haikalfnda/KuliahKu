@@ -10,8 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,11 +20,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.haikal0045.kuliahku.R
+import com.haikal0045.kuliahku.model.Kategori
 import com.haikal0045.kuliahku.util.ViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +52,9 @@ fun DetailScreen(
     val factory = ViewModelFactory(context)
     val viewModel: DetailViewModel = viewModel(factory = factory)
 
+    val kategoriList by viewModel.kategori.collectAsState()
+
+    var kategoriId by remember { mutableLongStateOf(0L) }
     var mataKuliah by remember { mutableStateOf("") }
     var judul by remember { mutableStateOf("") }
     var deadline by remember { mutableStateOf("") }
@@ -56,11 +62,18 @@ fun DetailScreen(
     var tanggalDibuat by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
 
+    LaunchedEffect(kategoriList) {
+        if (id == null && kategoriId == 0L && kategoriList.isNotEmpty()) {
+            kategoriId = kategoriList.first().id
+        }
+    }
+
     LaunchedEffect(id) {
         if (id != null) {
             val tugas = viewModel.getTugas(id)
 
             if (tugas != null) {
+                kategoriId = tugas.kategoriId
                 mataKuliah = tugas.mataKuliah
                 judul = tugas.judul
                 deadline = tugas.deadline
@@ -84,7 +97,7 @@ fun DetailScreen(
                         )
                     )
                 },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
                 ),
@@ -105,6 +118,7 @@ fun DetailScreen(
                     IconButton(
                         onClick = {
                             if (
+                                kategoriId == 0L ||
                                 mataKuliah.isBlank() ||
                                 judul.isBlank() ||
                                 deadline.isBlank() ||
@@ -120,6 +134,7 @@ fun DetailScreen(
 
                             if (id == null) {
                                 viewModel.insert(
+                                    kategoriId = kategoriId,
                                     mataKuliah = mataKuliah,
                                     judul = judul,
                                     deadline = deadline,
@@ -128,6 +143,7 @@ fun DetailScreen(
                             } else {
                                 viewModel.update(
                                     id = id,
+                                    kategoriId = kategoriId,
                                     mataKuliah = mataKuliah,
                                     judul = judul,
                                     deadline = deadline,
@@ -147,8 +163,12 @@ fun DetailScreen(
                     }
 
                     if (id != null) {
-                        DeleteAction {
-                            showDialog = true
+                        TextButton(
+                            onClick = {
+                                showDialog = true
+                            }
+                        ) {
+                            Text(text = stringResource(R.string.hapus_tugas))
                         }
                     }
                 }
@@ -156,6 +176,9 @@ fun DetailScreen(
         }
     ) { innerPadding ->
         FormTugas(
+            kategoriList = kategoriList,
+            kategoriId = kategoriId,
+            onKategoriChange = { kategoriId = it },
             mataKuliah = mataKuliah,
             onMataKuliahChange = { mataKuliah = it },
             judul = judul,
@@ -174,7 +197,7 @@ fun DetailScreen(
                 },
                 onConfirmation = {
                     showDialog = false
-                    viewModel.delete(id)
+                    viewModel.moveToRecycleBin(id)
                     navController.popBackStack()
                 }
             )
@@ -184,6 +207,9 @@ fun DetailScreen(
 
 @Composable
 fun FormTugas(
+    kategoriList: List<Kategori>,
+    kategoriId: Long,
+    onKategoriChange: (Long) -> Unit,
     mataKuliah: String,
     onMataKuliahChange: (String) -> Unit,
     judul: String,
@@ -194,12 +220,48 @@ fun FormTugas(
     onDeskripsiChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val namaKategori = kategoriList.firstOrNull {
+        it.id == kategoriId
+    }?.nama ?: stringResource(R.string.pilih_kategori)
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        Text(text = stringResource(R.string.kategori))
+
+        Button(
+            onClick = {
+                expanded = true
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = namaKategori)
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = {
+                expanded = false
+            }
+        ) {
+            kategoriList.forEach { kategori ->
+                DropdownMenuItem(
+                    text = {
+                        Text(text = kategori.nama)
+                    },
+                    onClick = {
+                        onKategoriChange(kategori.id)
+                        expanded = false
+                    }
+                )
+            }
+        }
+
         OutlinedTextField(
             value = mataKuliah,
             onValueChange = onMataKuliahChange,
@@ -250,48 +312,6 @@ fun FormTugas(
             ),
             minLines = 6,
             modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-fun DeleteAction(
-    onDeleteClick: () -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    IconButton(
-        onClick = {
-            expanded = true
-        }
-    ) {
-        Icon(
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = stringResource(R.string.opsi_lainnya),
-            tint = MaterialTheme.colorScheme.primary
-        )
-    }
-
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = {
-            expanded = false
-        }
-    ) {
-        DropdownMenuItem(
-            text = {
-                Text(text = stringResource(R.string.hapus_tugas))
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null
-                )
-            },
-            onClick = {
-                expanded = false
-                onDeleteClick()
-            }
         )
     }
 }
