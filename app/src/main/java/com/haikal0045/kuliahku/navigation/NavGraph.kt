@@ -8,6 +8,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.haikal0045.kuliahku.ui.screen.DetailScreen
 import com.haikal0045.kuliahku.ui.screen.MainScreen
+import com.haikal0045.kuliahku.ui.screen.RecycleBinScreen
+import com.haikal0045.kuliahku.ui.screen.ThemeScreen
 
 @Composable
 fun SetupNavGraph() {
@@ -18,7 +20,7 @@ fun SetupNavGraph() {
         startDestination = Screen.Home.route
     ) {
         composable(route = Screen.Home.route) {
-            MainScreen(navController)
+            MainScreen(navController = navController)
         }
 
         composable(route = Screen.FormBaru.route) {
@@ -38,6 +40,14 @@ fun SetupNavGraph() {
                 navController = navController,
                 id = id
             )
+        }
+
+        composable(route = Screen.RecycleBin.route) {
+            RecycleBinScreen(navController = navController)
+        }
+
+        composable(route = Screen.Tema.route) {
+            ThemeScreen(navController = navController)
         }
     }
 }
