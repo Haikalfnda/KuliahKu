@@ -4,16 +4,19 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.haikal0045.kuliahku.model.Kategori
 import com.haikal0045.kuliahku.model.Tugas
 
 @Database(
-    entities = [Tugas::class],
-    version = 1,
+    entities = [Tugas::class, Kategori::class],
+    version = 2,
     exportSchema = false
 )
 abstract class TugasDb : RoomDatabase() {
 
-    abstract val dao: TugasDao
+    abstract fun tugasDao(): TugasDao
+
+    abstract fun kategoriDao(): KategoriDao
 
     companion object {
         @Volatile
@@ -27,8 +30,10 @@ abstract class TugasDb : RoomDatabase() {
                     instance = Room.databaseBuilder(
                         context.applicationContext,
                         TugasDb::class.java,
-                        "tugas.db"
-                    ).build()
+                        "kuliahku.db"
+                    )
+                        .fallbackToDestructiveMigration()
+                        .build()
 
                     INSTANCE = instance
                 }
